@@ -1,0 +1,17 @@
+# Local prompt/export bundle
+UI-COMMAND/
+UI-COMMAND.zip
+
+# Duplicate working copy retained locally
+prof-index.html
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Logs/temp files
+*.log
+tmp/
+temp/
