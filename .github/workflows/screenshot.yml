@@ -1,0 +1,42 @@
+name: Refresh dashboard screenshot
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - refactor/reviewiq-cleanup
+    paths:
+      - 'index.html'
+      - 'assets/css/**'
+      - 'assets/js/**'
+      - '.github/workflows/screenshot.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  screenshot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Chromium and Playwright
+        run: npx --yes playwright@1.56.1 install --with-deps chromium
+      - name: Verify JavaScript syntax
+        run: node --check assets/js/app.js
+      - name: Start local server
+        run: |
+          python3 -m http.server 8787 >/tmp/reviewiq-http.log 2>&1 &
+          sleep 2
+      - name: Capture actual dashboard screenshot
+        run: |
+          npx --yes playwright@1.56.1 screenshot --browser chromium --viewport-size "1600,1050" --wait-for-timeout 1600 http://127.0.0.1:8787/ assets/dashboard-screenshot.png
+      - name: Commit updated image
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/dashboard-screenshot.png
+          if ! git diff --cached --quiet; then
+            git commit -m "docs: refresh dashboard screenshot"
+            git push
+          fi
